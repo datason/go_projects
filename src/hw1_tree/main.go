@@ -6,12 +6,9 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strings"
 )
 
-// func recursiveDirTree()
-
-func dirTree(output io.Writer, path string, printFiles bool, tabCounter int) error {
+func dirTree(output io.Writer, path string, printFiles bool, startStr string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -27,23 +24,35 @@ func dirTree(output io.Writer, path string, printFiles bool, tabCounter int) err
 		return fileInfo[i].Name() < fileInfo[j].Name()
 	})
 
+	// Filter before main print loop, because of true last position.
+	// If we don't print files, but they are in os.FileInfo, last folder can be print uncorrectly.
+	if !printFiles {
+		var fileInfoFiltered []os.FileInfo
+
+		for _, file := range fileInfo {
+			if file.IsDir() {
+				fileInfoFiltered = append(fileInfoFiltered, file)
+			}
+		}
+		fileInfo = fileInfoFiltered
+	}
+
 	for e, file := range fileInfo {
 
 		if file.IsDir() {
-			startStr := strings.Repeat("|   ", tabCounter)
 
 			if e < (len(fileInfo) - 1) {
 				res := startStr + "├───" + file.Name() + "\n"
 				fmt.Printf(res)
-
+				dirTree(output, path+`/`+file.Name(), printFiles, startStr+"|   ")
 			} else {
 				res := startStr + "└───" + file.Name() + "\n"
 				fmt.Printf(res)
+
+				dirTree(output, path+`/`+file.Name(), printFiles, startStr+"    ")
 			}
-			dirTree(output, path+`/`+file.Name(), printFiles, tabCounter+1)
+
 		} else if printFiles {
-			startStr := strings.Repeat("|   ", tabCounter)
-			// print("%T", file.Size())
 			var endStr string
 			if file.Size() == 0 {
 				endStr = " (empty)"
@@ -74,7 +83,7 @@ func main() {
 	path := os.Args[1]
 	printFiles := len(os.Args) == 3 && os.Args[2] == "-f"
 
-	err := dirTree(out, path, printFiles, 0)
+	err := dirTree(out, path, printFiles, "")
 	if err != nil {
 		panic(err.Error())
 	}
