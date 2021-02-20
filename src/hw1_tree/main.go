@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-func dirTree(output io.Writer, path string, printFiles bool, startStr string) error {
+func recursiveDirTree(output io.Writer, path string, printFiles bool, startStr string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -44,12 +44,12 @@ func dirTree(output io.Writer, path string, printFiles bool, startStr string) er
 			if e < (len(fileInfo) - 1) {
 				res := startStr + "├───" + file.Name() + "\n"
 				fmt.Printf(res)
-				dirTree(output, path+`/`+file.Name(), printFiles, startStr+"|   ")
+				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"|   ")
 			} else {
 				res := startStr + "└───" + file.Name() + "\n"
 				fmt.Printf(res)
 
-				dirTree(output, path+`/`+file.Name(), printFiles, startStr+"    ")
+				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"    ")
 			}
 
 		} else if printFiles {
@@ -75,6 +75,10 @@ func dirTree(output io.Writer, path string, printFiles bool, startStr string) er
 	return nil
 }
 
+func dirTree(output io.Writer, path string, printFiles bool) error {
+	return recursiveDirTree(output, path, printFiles, "")
+}
+
 func main() {
 	out := os.Stdout
 	if !(len(os.Args) == 2 || len(os.Args) == 3) {
@@ -83,7 +87,7 @@ func main() {
 	path := os.Args[1]
 	printFiles := len(os.Args) == 3 && os.Args[2] == "-f"
 
-	err := dirTree(out, path, printFiles, "")
+	err := dirTree(out, path, printFiles)
 	if err != nil {
 		panic(err.Error())
 	}
