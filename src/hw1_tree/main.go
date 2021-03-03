@@ -43,13 +43,13 @@ func recursiveDirTree(output io.Writer, path string, printFiles bool, startStr s
 
 			if e < (len(fileInfo) - 1) {
 				res := startStr + "├───" + file.Name() + "\n"
-				fmt.Printf(res)
-				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"|   ")
+				fmt.Fprintf(output, res)
+				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"│	")
 			} else {
 				res := startStr + "└───" + file.Name() + "\n"
-				fmt.Printf(res)
+				fmt.Fprintf(output, res)
 
-				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"    ")
+				recursiveDirTree(output, path+`/`+file.Name(), printFiles, startStr+"	")
 			}
 
 		} else if printFiles {
@@ -62,10 +62,10 @@ func recursiveDirTree(output io.Writer, path string, printFiles bool, startStr s
 
 			if e < (len(fileInfo) - 1) {
 				res := startStr + "├───" + file.Name() + endStr + "\n"
-				fmt.Printf(res)
+				fmt.Fprintf(output, res)
 			} else {
 				res := startStr + "└───" + file.Name() + endStr + "\n"
-				fmt.Printf(res)
+				fmt.Fprintf(output, res)
 			}
 		} else {
 			continue
