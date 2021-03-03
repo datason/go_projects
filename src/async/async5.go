@@ -15,7 +15,7 @@ func f(out chan<- int) {
 		fmt.Println("after", i)
 	}
 	close(out)
-	fmt.Println("generatot finish")
+	fmt.Println("generator finish")
 }
 
 func main() {
